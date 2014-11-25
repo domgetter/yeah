@@ -1,7 +1,8 @@
 module Yeah
 module Web
 class Display
-  attr_reader :gl
+  attr_reader :gl, :fill_color
+  attr_accessor :clear_color
 
   VERTEX_SHADER = <<-glsl
     attribute vec2 a_position;
@@ -22,7 +23,7 @@ class Display
     uniform vec3 u_color;
 
     void main(void) {
-      gl_FragColor = vec4(u_color, 1.0);
+      gl_FragColor = vec4(u_color, 0.1);
     }
   glsl
 
@@ -32,7 +33,7 @@ class Display
     @canvas = `document.querySelectorAll(#{canvas_selector})[0]`
     @gl = `#@canvas.getContext('webgl')`
 
-    @fill_color = Color[0, 0, 0]
+    @clear_color = Color[0, 0, 0]
 
     identity
     setup_shaders
@@ -68,10 +69,6 @@ class Display
     end
   end
 
-  def fill_color
-    @fill_color
-  end
-
   def fill_color=(color)
     %x{
       #@gl.uniform3f(#@col_loc,
@@ -104,30 +101,25 @@ class Display
     }
   end
 
-  def clear
+  def preframe
     %x{
-      #@gl.clearColor(#{@fill_color.value[0]} / 255.0,
-                      #{@fill_color.value[1]} / 255.0,
-                      #{@fill_color.value[2]} / 255.0, 1);
+      // Viewport
+      #@gl.viewport(0, 0, #@canvas.width, #@canvas.height)
+
+      // Clear
+      #@gl.clearColor(#{@clear_color.value[0]} / 255.0,
+                      #{@clear_color.value[1]} / 255.0,
+                      #{@clear_color.value[2]} / 255.0, 1);
       #@gl.clear(#@gl.COLOR_BUFFER_BIT);
     }
-  end
 
-  def draw_image(image, x, y)
-  end
-
-  def set_viewport
-    `#@gl.viewport(0, 0, #@canvas.width, #@canvas.height)`
-  end
-
-  def identity
+    # Identity
     @transform = [1, 0, 0, 0,
                   0, 1, 0, 0,
                   0, 0, 1, 0,
                   0, 0, 0, 1]
-  end
 
-  def perspective
+    # Perspective
     t = @transform
 
     # Translate transform by (-1, -1, 0).
@@ -147,6 +139,18 @@ class Display
     t[5] *= scale_y
     t[6] *= scale_y
     t[7] *= scale_y
+  end
+
+  def draw_image(image, x, y)
+  end
+
+  def set_viewport
+  end
+
+  def identity
+  end
+
+  def perspective
   end
 
 private
