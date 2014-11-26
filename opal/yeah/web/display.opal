@@ -33,7 +33,7 @@ class Display
     @canvas = `document.querySelectorAll(#{canvas_selector})[0]`
     @gl = `#@canvas.getContext('webgl')`
 
-    @clear_color = Color[0, 0, 0]
+    @clear_color = Color.new(0, 0, 0)
 
     setup_shaders
 
