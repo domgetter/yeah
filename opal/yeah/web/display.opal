@@ -20,10 +20,10 @@ class Display
   FRAGMENT_SHADER = <<-glsl
     precision mediump float;
 
-    uniform vec3 u_color;
+    uniform vec4 u_color;
 
     void main(void) {
-      gl_FragColor = vec4(u_color, 0.1);
+      gl_FragColor = u_color;
     }
   glsl
 
@@ -35,7 +35,6 @@ class Display
 
     @clear_color = Color[0, 0, 0]
 
-    identity
     setup_shaders
 
     `DISPLAY = #{self}`
@@ -71,10 +70,10 @@ class Display
 
   def fill_color=(color)
     %x{
-      #@gl.uniform3f(#@col_loc,
-                      #{color.value[0]} / 255.0,
-                      #{color.value[1]} / 255.0,
-                      #{color.value[2]} / 255.0);
+      var val = #{color.value};
+
+      #@gl.uniform4f(#@col_loc,
+                      val[0] / 255.0, val[1] / 255.0, val[2] / 255.0, val[3]);
     }
 
     @fill_color = color
@@ -139,18 +138,14 @@ class Display
     t[5] *= scale_y
     t[6] *= scale_y
     t[7] *= scale_y
+
+    %x{
+      #@gl.blendFunc(#@gl.SRC_ALPHA, #@gl.ONE_MINUS_SRC_ALPHA);
+      #@gl.enable(#@gl.BLEND);
+    }
   end
 
   def draw_image(image, x, y)
-  end
-
-  def set_viewport
-  end
-
-  def identity
-  end
-
-  def perspective
   end
 
 private
